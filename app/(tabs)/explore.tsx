@@ -1,112 +1,213 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { useState, useEffect, useMemo, memo } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useRouter } from 'expo-router';
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { TopicTree } from '@/components/syllabus/topic-tree';
+import { Borders, Colors, Spacing } from '@/constants/theme';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useSyllabusStore } from '@/stores/use-syllabus-store';
+import type { Subject, Topic } from '@/lib/types';
 
-export default function TabTwoScreen() {
+const ProgressBar = memo(function ProgressBar({ progress, color }: { progress: number; color: string }) {
+  const colorScheme = useColorScheme() ?? 'light';
+  const colors = Colors[colorScheme];
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
+    <View style={[styles.progressContainer, { borderColor: colors.border }]}>
+      <View
+        style={[
+          styles.progressFill,
+          {
+            width: `${progress * 100}%`,
+            backgroundColor: color,
+          },
+        ]}
+      />
+    </View>
+  );
+});
+
+const SubjectCard = memo(function SubjectCard({ subject }: { subject: Subject }) {
+  const [expanded, setExpanded] = useState(false);
+  const colorScheme = useColorScheme() ?? 'light';
+  const colors = Colors[colorScheme];
+
+  return (
+    <Card style={styles.subjectCard}>
+      <Pressable onPress={() => setExpanded(!expanded)}>
+        <View style={styles.subjectHeader}>
+          <View style={[styles.colorIndicator, { backgroundColor: subject.colorHex }]} />
+          <View style={styles.subjectInfo}>
+            <ThemedText type="subtitle">{subject.name.toUpperCase()}</ThemedText>
+            <ThemedText type="label" style={{ color: colors.muted }}>
+              {Math.round(subject.progress * 100)}% COMPLETE
             </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+          </View>
+          <ThemedText type="label">{expanded ? '[-]' : '[+]'}</ThemedText>
+        </View>
+        <ProgressBar progress={subject.progress} color={subject.colorHex} />
+      </Pressable>
+
+      {expanded && (
+        <View style={[styles.topicList, { borderTopColor: colors.border }]}>
+          <TopicTree topics={subject.topics} />
+        </View>
+      )}
+    </Card>
+  );
+});
+
+// Helper to count topics recursively
+function countTopics(topics: Topic[]): number {
+  return topics.reduce((sum, t) => sum + 1 + (t.children ? countTopics(t.children) : 0), 0);
+}
+
+export default function SubjectsScreen() {
+  const colorScheme = useColorScheme() ?? 'light';
+  const colors = Colors[colorScheme];
+  const router = useRouter();
+
+  const { subjects, isLoading, fetchSubjects, getTotalProgress } = useSyllabusStore();
+
+  useEffect(() => {
+    fetchSubjects();
+  }, [fetchSubjects]);
+
+  // Memoize expensive calculations
+  const totalProgress = getTotalProgress();
+  const totalTopics = useMemo(() => {
+    return subjects.reduce((acc, s) => acc + countTopics(s.topics), 0);
+  }, [subjects]);
+
+  if (isLoading && subjects.length === 0) {
+    return (
+      <ThemedView style={styles.loading}>
+        <ThemedText type="label">LOADING...</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  return (
+    <ThemedView style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Overview Stats */}
+        <View style={[styles.overview, { borderBottomColor: colors.border }]}>
+          <View style={styles.overviewStat}>
+            <ThemedText type="title">{subjects.length}</ThemedText>
+            <ThemedText type="label">SUBJECTS</ThemedText>
+          </View>
+          <View style={styles.overviewStat}>
+            <ThemedText type="title">{totalTopics}</ThemedText>
+            <ThemedText type="label">TOPICS</ThemedText>
+          </View>
+          <View style={styles.overviewStat}>
+            <ThemedText type="title">{Math.round(totalProgress * 100)}%</ThemedText>
+            <ThemedText type="label">OVERALL</ThemedText>
+          </View>
+        </View>
+
+        {/* Subject List */}
+        <View style={styles.subjectList}>
+          <ThemedText type="label" style={styles.sectionLabel}>
+            KNOWLEDGE TREE
+          </ThemedText>
+          {subjects.length === 0 ? (
+            <Card>
+              <ThemedText style={{ textAlign: 'center', color: colors.muted }}>
+                NO SUBJECTS YET. UPLOAD A SYLLABUS TO GET STARTED.
+              </ThemedText>
+            </Card>
+          ) : (
+            subjects.map((subject) => (
+              <SubjectCard key={subject.id} subject={subject} />
+            ))
+          )}
+        </View>
+
+        {/* Upload Syllabus Button */}
+        <View style={styles.actions}>
+          <Button
+            title="+ UPLOAD SYLLABUS"
+            variant="primary"
+            onPress={() => router.push('/modals/upload-syllabus')}
+          />
+        </View>
+      </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
   },
-  titleContainer: {
+  loading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    padding: Spacing.md,
+    gap: Spacing.lg,
+    paddingBottom: Spacing.xl,
+  },
+  overview: {
     flexDirection: 'row',
-    gap: 8,
+    justifyContent: 'space-around',
+    paddingBottom: Spacing.lg,
+    borderBottomWidth: Borders.thin,
+  },
+  overviewStat: {
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  subjectList: {
+    gap: Spacing.md,
+  },
+  sectionLabel: {
+    marginBottom: Spacing.xs,
+  },
+  subjectCard: {
+    gap: Spacing.sm,
+  },
+  subjectHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  colorIndicator: {
+    width: 4,
+    height: 40,
+  },
+  subjectInfo: {
+    flex: 1,
+    gap: Spacing.xs,
+  },
+  progressContainer: {
+    height: 8,
+    borderWidth: Borders.thin,
+    marginTop: Spacing.sm,
+  },
+  progressFill: {
+    height: '100%',
+  },
+  topicList: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: Borders.thin,
+  },
+  actions: {
+    marginTop: Spacing.md,
   },
 });

@@ -1,11 +1,12 @@
 import { StyleSheet, Text, type TextProps } from 'react-native';
 
+import { Fonts, FontSizes, LineHeights, LetterSpacing } from '@/constants/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 export type ThemedTextProps = TextProps & {
   lightColor?: string;
   darkColor?: string;
-  type?: 'default' | 'title' | 'defaultSemiBold' | 'subtitle' | 'link';
+  type?: 'default' | 'title' | 'subtitle' | 'label' | 'mono' | 'link';
 };
 
 export function ThemedText({
@@ -20,12 +21,14 @@ export function ThemedText({
   return (
     <Text
       style={[
+        styles.base,
         { color },
-        type === 'default' ? styles.default : undefined,
-        type === 'title' ? styles.title : undefined,
-        type === 'defaultSemiBold' ? styles.defaultSemiBold : undefined,
-        type === 'subtitle' ? styles.subtitle : undefined,
-        type === 'link' ? styles.link : undefined,
+        type === 'default' && styles.default,
+        type === 'title' && styles.title,
+        type === 'subtitle' && styles.subtitle,
+        type === 'label' && styles.label,
+        type === 'mono' && styles.mono,
+        type === 'link' && styles.link,
         style,
       ]}
       {...rest}
@@ -34,27 +37,42 @@ export function ThemedText({
 }
 
 const styles = StyleSheet.create({
-  default: {
-    fontSize: 16,
-    lineHeight: 24,
+  base: {
+    fontFamily: Fonts.mono,
   },
-  defaultSemiBold: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: '600',
+  default: {
+    fontSize: FontSizes.md,
+    lineHeight: LineHeights.md,
   },
   title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    lineHeight: 32,
+    fontSize: FontSizes.xxl,
+    fontWeight: '700',
+    lineHeight: LineHeights.xl,
+    textTransform: 'uppercase',
+    letterSpacing: LetterSpacing.wide,
   },
   subtitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: FontSizes.xl,
+    fontWeight: '700',
+    lineHeight: LineHeights.lg,
+    textTransform: 'uppercase',
+    letterSpacing: LetterSpacing.normal,
+  },
+  label: {
+    fontSize: FontSizes.sm,
+    fontWeight: '600',
+    lineHeight: LineHeights.xs,
+    textTransform: 'uppercase',
+    letterSpacing: LetterSpacing.medium,
+  },
+  mono: {
+    fontSize: FontSizes.md,
+    lineHeight: LineHeights.sm,
   },
   link: {
-    lineHeight: 30,
-    fontSize: 16,
-    color: '#0a7ea4',
+    fontSize: FontSizes.md,
+    lineHeight: LineHeights.md,
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'solid',
   },
 });
