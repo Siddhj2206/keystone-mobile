@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, ScrollView, Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import * as DocumentPicker from 'expo-document-picker';
 
 import { ThemedText } from '@/components/themed-text';
@@ -15,11 +15,14 @@ import { useSyllabusStore } from '@/stores/use-syllabus-store';
 export default function UploadSyllabusModal() {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
+  const { subjectId: initialSubjectId } = useLocalSearchParams<{ subjectId?: string }>();
 
   const { subjects, fetchSubjects, createSubject, uploadSyllabus } = useSyllabusStore();
 
-  const [mode, setMode] = useState<'select' | 'create'>('select');
-  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null);
+  // If subjectId is provided, skip subject selection
+  const hasPreselectedSubject = !!initialSubjectId;
+  const [mode, setMode] = useState<'select' | 'create'>(hasPreselectedSubject ? 'select' : 'select');
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(initialSubjectId ?? null);
   const [newSubjectName, setNewSubjectName] = useState('');
   const [selectedColor, setSelectedColor] = useState(SubjectColors[0]);
   const [selectedFile, setSelectedFile] = useState<{ uri: string; name: string } | null>(null);
@@ -105,40 +108,66 @@ export default function UploadSyllabusModal() {
           </View>
         ) : null}
 
-        {/* Mode Toggle */}
-        <View style={styles.modeToggle}>
-          <Pressable
-            onPress={() => setMode('select')}
-            style={[
-              styles.modeButton,
-              {
-                borderColor: colors.border,
-                backgroundColor: mode === 'select' ? colors.text : 'transparent',
-              },
-            ]}
-          >
-            <ThemedText style={{ color: mode === 'select' ? colors.background : colors.text }}>
-              EXISTING
-            </ThemedText>
-          </Pressable>
-          <Pressable
-            onPress={() => setMode('create')}
-            style={[
-              styles.modeButton,
-              {
-                borderColor: colors.border,
-                backgroundColor: mode === 'create' ? colors.text : 'transparent',
-              },
-            ]}
-          >
-            <ThemedText style={{ color: mode === 'create' ? colors.background : colors.text }}>
-              NEW SUBJECT
-            </ThemedText>
-          </Pressable>
-        </View>
+        {/* Show preselected subject or mode toggle */}
+        {hasPreselectedSubject ? (
+          <View style={styles.section}>
+            <ThemedText type="label">SUBJECT</ThemedText>
+            {subjects.find((s) => s.id === initialSubjectId) && (
+              <View
+                style={[
+                  styles.subjectButton,
+                  {
+                    borderColor: subjects.find((s) => s.id === initialSubjectId)?.colorHex,
+                    backgroundColor: colors.surface,
+                  },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.colorDot,
+                    { backgroundColor: subjects.find((s) => s.id === initialSubjectId)?.colorHex },
+                  ]}
+                />
+                <ThemedText>{subjects.find((s) => s.id === initialSubjectId)?.name}</ThemedText>
+              </View>
+            )}
+          </View>
+        ) : (
+          /* Mode Toggle */
+          <View style={styles.modeToggle}>
+            <Pressable
+              onPress={() => setMode('select')}
+              style={[
+                styles.modeButton,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: mode === 'select' ? colors.text : 'transparent',
+                },
+              ]}
+            >
+              <ThemedText style={{ color: mode === 'select' ? colors.background : colors.text }}>
+                EXISTING
+              </ThemedText>
+            </Pressable>
+            <Pressable
+              onPress={() => setMode('create')}
+              style={[
+                styles.modeButton,
+                {
+                  borderColor: colors.border,
+                  backgroundColor: mode === 'create' ? colors.text : 'transparent',
+                },
+              ]}
+            >
+              <ThemedText style={{ color: mode === 'create' ? colors.background : colors.text }}>
+                NEW SUBJECT
+              </ThemedText>
+            </Pressable>
+          </View>
+        )}
 
-        {/* Existing Subject Selection */}
-        {mode === 'select' && (
+        {/* Existing Subject Selection - only show if no preselected subject */}
+        {!hasPreselectedSubject && mode === 'select' && (
           <View style={styles.section}>
             <ThemedText type="label">SELECT SUBJECT</ThemedText>
             <View style={styles.subjectList}>
@@ -168,8 +197,8 @@ export default function UploadSyllabusModal() {
           </View>
         )}
 
-        {/* New Subject Form */}
-        {mode === 'create' && (
+        {/* New Subject Form - only show if no preselected subject */}
+        {!hasPreselectedSubject && mode === 'create' && (
           <View style={styles.section}>
             <Input
               label="SUBJECT NAME"

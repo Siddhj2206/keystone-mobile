@@ -94,6 +94,22 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
+          name="subjects/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="exams/[id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="modals/add-subject"
+          options={{
+            presentation: 'modal',
+            title: 'ADD SUBJECT',
+            headerTitleStyle: HeaderStyles.title,
+          }}
+        />
+        <Stack.Screen
           name="modals/add-exam"
           options={{
             presentation: 'modal',

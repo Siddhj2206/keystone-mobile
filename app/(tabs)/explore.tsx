@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, memo } from 'react';
+import { useEffect, useMemo, memo } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
@@ -6,7 +6,6 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { TopicTree } from '@/components/syllabus/topic-tree';
 import { Borders, Colors, Spacing } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSyllabusStore } from '@/stores/use-syllabus-store';
@@ -31,14 +30,13 @@ const ProgressBar = memo(function ProgressBar({ progress, color }: { progress: n
   );
 });
 
-const SubjectCard = memo(function SubjectCard({ subject }: { subject: Subject }) {
-  const [expanded, setExpanded] = useState(false);
+const SubjectCard = memo(function SubjectCard({ subject, onPress }: { subject: Subject; onPress: () => void }) {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
   return (
-    <Card style={styles.subjectCard}>
-      <Pressable onPress={() => setExpanded(!expanded)}>
+    <Pressable onPress={onPress}>
+      <Card style={styles.subjectCard}>
         <View style={styles.subjectHeader}>
           <View style={[styles.colorIndicator, { backgroundColor: subject.colorHex }]} />
           <View style={styles.subjectInfo}>
@@ -47,17 +45,11 @@ const SubjectCard = memo(function SubjectCard({ subject }: { subject: Subject })
               {Math.round(subject.progress * 100)}% COMPLETE
             </ThemedText>
           </View>
-          <ThemedText type="label">{expanded ? '[-]' : '[+]'}</ThemedText>
+          <ThemedText type="label">{'>'}</ThemedText>
         </View>
         <ProgressBar progress={subject.progress} color={subject.colorHex} />
-      </Pressable>
-
-      {expanded && (
-        <View style={[styles.topicList, { borderTopColor: colors.border }]}>
-          <TopicTree topics={subject.topics} />
-        </View>
-      )}
-    </Card>
+      </Card>
+    </Pressable>
   );
 });
 
@@ -122,22 +114,26 @@ export default function SubjectsScreen() {
           {subjects.length === 0 ? (
             <Card>
               <ThemedText style={{ textAlign: 'center', color: colors.muted }}>
-                NO SUBJECTS YET. UPLOAD A SYLLABUS TO GET STARTED.
+                NO SUBJECTS YET. ADD A SUBJECT TO GET STARTED.
               </ThemedText>
             </Card>
           ) : (
             subjects.map((subject) => (
-              <SubjectCard key={subject.id} subject={subject} />
+              <SubjectCard
+                key={subject.id}
+                subject={subject}
+                onPress={() => router.push(`/subjects/${subject.id}`)}
+              />
             ))
           )}
         </View>
 
-        {/* Upload Syllabus Button */}
+        {/* Add Subject Button */}
         <View style={styles.actions}>
           <Button
-            title="+ UPLOAD SYLLABUS"
+            title="+ ADD SUBJECT"
             variant="primary"
-            onPress={() => router.push('/modals/upload-syllabus')}
+            onPress={() => router.push('/modals/add-subject')}
           />
         </View>
       </ScrollView>
@@ -201,11 +197,6 @@ const styles = StyleSheet.create({
   },
   progressFill: {
     height: '100%',
-  },
-  topicList: {
-    marginTop: Spacing.md,
-    paddingTop: Spacing.md,
-    borderTopWidth: Borders.thin,
   },
   actions: {
     marginTop: Spacing.md,

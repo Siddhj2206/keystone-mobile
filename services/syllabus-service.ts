@@ -72,6 +72,14 @@ export const syllabusService = {
   },
 
   /**
+   * Update an existing assessment
+   */
+  async updateAssessment(id: string, data: Partial<Assessment>): Promise<Assessment> {
+    const response = await api.patch<Assessment>(`/api/assessments/${id}`, data);
+    return response.data;
+  },
+
+  /**
    * Update topic mastery after completing a session
    */
   async updateTopicMastery(

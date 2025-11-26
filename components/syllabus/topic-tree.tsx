@@ -2,7 +2,7 @@ import { StyleSheet, View, Pressable } from 'react-native';
 import { useState } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
-import { Colors, Spacing, Borders, Sizes, IconSizes } from '@/constants/theme';
+import { Colors, Spacing, Borders, Sizes } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import type { Topic } from '@/lib/types';
 
@@ -152,7 +152,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   expandIcon: {
-    width: IconSizes.lg,
+    width: 28,
+    textAlign: 'center',
   },
   title: {
     flex: 1,

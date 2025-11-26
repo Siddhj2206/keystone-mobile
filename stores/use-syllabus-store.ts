@@ -63,6 +63,48 @@ const MOCK_SUBJECTS: Subject[] = [
   },
 ];
 
+// Helper to get dates relative to today
+const daysFromNow = (days: number): string => {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString();
+};
+
+const MOCK_ASSESSMENTS: Assessment[] = [
+  {
+    id: 'exam-1',
+    title: 'Linear Algebra Midterm',
+    date: daysFromNow(5),
+    weightage: 25,
+    topicIds: ['1a', '1a1', '1a2', '1b', '1b1', '1b2'],
+    subjectId: '1',
+  },
+  {
+    id: 'exam-2',
+    title: 'Calculus II Quiz',
+    date: daysFromNow(12),
+    weightage: 10,
+    topicIds: ['2a', '2b'],
+    subjectId: '2',
+  },
+  {
+    id: 'exam-3',
+    title: 'Physics Final',
+    date: daysFromNow(21),
+    weightage: 40,
+    topicIds: ['3a', '3b', '3c'],
+    subjectId: '3',
+  },
+  {
+    id: 'exam-4',
+    title: 'Calculus II Midterm',
+    date: daysFromNow(-7),
+    weightage: 20,
+    topicIds: ['2a'],
+    subjectId: '2',
+  },
+];
+
 interface SyllabusState {
   // State
   subjects: Subject[];
@@ -76,7 +118,9 @@ interface SyllabusState {
   uploadSyllabus: (subjectId: string, fileUri: string, fileName: string) => Promise<void>;
   createSubject: (name: string, colorHex: string) => Promise<Subject>;
   createAssessment: (data: CreateAssessmentInput) => Promise<Assessment>;
+  updateAssessment: (id: string, data: Partial<Assessment>) => Promise<void>;
   getSubjectById: (id: string) => Subject | undefined;
+  getAssessmentById: (id: string) => Assessment | undefined;
   getTotalProgress: () => number;
 }
 
@@ -111,7 +155,7 @@ export const useSyllabusStore = create<SyllabusState>((set, get) => ({
   fetchAssessments: async () => {
     const isGuest = await guestAuth.isGuestMode();
     if (isGuest) {
-      set({ assessments: [] });
+      set({ assessments: MOCK_ASSESSMENTS });
       return;
     }
 
@@ -196,6 +240,34 @@ export const useSyllabusStore = create<SyllabusState>((set, get) => ({
 
   getSubjectById: (id: string) => {
     return get().subjects.find((s) => s.id === id);
+  },
+
+  getAssessmentById: (id: string) => {
+    return get().assessments.find((a) => a.id === id);
+  },
+
+  updateAssessment: async (id: string, data: Partial<Assessment>) => {
+    const isGuest = await guestAuth.isGuestMode();
+    if (isGuest) {
+      set({
+        assessments: get().assessments.map((a) =>
+          a.id === id ? { ...a, ...data } : a
+        ),
+      });
+      return;
+    }
+
+    try {
+      const updatedAssessment = await syllabusService.updateAssessment(id, data);
+      set({
+        assessments: get().assessments.map((a) =>
+          a.id === id ? updatedAssessment : a
+        ),
+      });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to update assessment' });
+      throw error;
+    }
   },
 
   getTotalProgress: () => {

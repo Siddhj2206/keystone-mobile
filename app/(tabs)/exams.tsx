@@ -1,5 +1,5 @@
-import { useEffect, useMemo, memo } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, memo, useCallback } from 'react';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
@@ -11,7 +11,15 @@ import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSyllabusStore } from '@/stores/use-syllabus-store';
 import type { Assessment } from '@/lib/types';
 
-const AssessmentCard = memo(function AssessmentCard({ assessment, now }: { assessment: Assessment; now: Date }) {
+const AssessmentCard = memo(function AssessmentCard({
+  assessment,
+  now,
+  onPress,
+}: {
+  assessment: Assessment;
+  now: Date;
+  onPress: () => void;
+}) {
   const colorScheme = useColorScheme() ?? 'light';
   const colors = Colors[colorScheme];
 
@@ -28,35 +36,37 @@ const AssessmentCard = memo(function AssessmentCard({ assessment, now }: { asses
   };
 
   return (
-    <Card style={styles.assessmentCard}>
-      <View style={styles.assessmentHeader}>
-        <ThemedText type="subtitle">{assessment.title.toUpperCase()}</ThemedText>
-        <ThemedText type="label" style={{ color: colors.muted }}>
-          {assessment.weightage}%
-        </ThemedText>
-      </View>
-      <View style={styles.assessmentMeta}>
-        <ThemedText type="label">{formatDate(date)}</ThemedText>
-        {isUpcoming && daysUntil > 0 && (
-          <ThemedText
-            type="label"
-            style={{
-              color: daysUntil <= 7 ? colors.accent : colors.muted,
-            }}
-          >
-            {daysUntil === 1 ? 'TOMORROW' : `${daysUntil} DAYS`}
-          </ThemedText>
-        )}
-        {!isUpcoming && (
+    <Pressable onPress={onPress}>
+      <Card style={styles.assessmentCard}>
+        <View style={styles.assessmentHeader}>
+          <ThemedText type="subtitle">{assessment.title.toUpperCase()}</ThemedText>
           <ThemedText type="label" style={{ color: colors.muted }}>
-            COMPLETED
+            {assessment.weightage}%
           </ThemedText>
-        )}
-      </View>
-      <ThemedText style={{ color: colors.muted }}>
-        {assessment.topicIds.length} TOPICS
-      </ThemedText>
-    </Card>
+        </View>
+        <View style={styles.assessmentMeta}>
+          <ThemedText type="label">{formatDate(date)}</ThemedText>
+          {isUpcoming && daysUntil > 0 && (
+            <ThemedText
+              type="label"
+              style={{
+                color: daysUntil <= 7 ? colors.accent : colors.muted,
+              }}
+            >
+              {daysUntil === 1 ? 'TOMORROW' : `${daysUntil} DAYS`}
+            </ThemedText>
+          )}
+          {!isUpcoming && (
+            <ThemedText type="label" style={{ color: colors.muted }}>
+              COMPLETED
+            </ThemedText>
+          )}
+        </View>
+        <ThemedText style={{ color: colors.muted }}>
+          {assessment.topicIds.length} TOPICS
+        </ThemedText>
+      </Card>
+    </Pressable>
   );
 });
 
@@ -83,6 +93,10 @@ export default function ExamsScreen() {
     const past = sorted.filter((a) => new Date(a.date) <= now);
     return { upcomingAssessments: upcoming, pastAssessments: past };
   }, [assessments, now]);
+
+  const handleExamPress = useCallback((id: string) => {
+    router.push(`/exams/${id}`);
+  }, [router]);
 
   return (
     <ThemedView style={styles.container}>
@@ -114,7 +128,12 @@ export default function ExamsScreen() {
               UPCOMING
             </ThemedText>
             {upcomingAssessments.map((assessment) => (
-              <AssessmentCard key={assessment.id} assessment={assessment} now={now} />
+              <AssessmentCard
+                key={assessment.id}
+                assessment={assessment}
+                now={now}
+                onPress={() => handleExamPress(assessment.id)}
+              />
             ))}
           </View>
         )}
@@ -126,7 +145,12 @@ export default function ExamsScreen() {
               PAST
             </ThemedText>
             {pastAssessments.map((assessment) => (
-              <AssessmentCard key={assessment.id} assessment={assessment} now={now} />
+              <AssessmentCard
+                key={assessment.id}
+                assessment={assessment}
+                now={now}
+                onPress={() => handleExamPress(assessment.id)}
+              />
             ))}
           </View>
         )}
@@ -139,16 +163,16 @@ export default function ExamsScreen() {
             </ThemedText>
           </Card>
         )}
-      </ScrollView>
 
-      {/* Add Exam Button */}
-      <View style={[styles.actions, { borderTopColor: colors.border }]}>
-        <Button
-          title="+ ADD EXAM"
-          variant="primary"
-          onPress={() => router.push('/modals/add-exam')}
-        />
-      </View>
+        {/* Add Exam Button */}
+        <View style={styles.actions}>
+          <Button
+            title="+ ADD EXAM"
+            variant="primary"
+            onPress={() => router.push('/modals/add-exam')}
+          />
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -166,11 +190,11 @@ const styles = StyleSheet.create({
   },
   stats: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     paddingBottom: Spacing.lg,
     borderBottomWidth: Borders.thin,
   },
   stat: {
+    flex: 1,
     alignItems: 'center',
     gap: Spacing.xs,
   },
@@ -194,7 +218,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   actions: {
-    padding: Spacing.md,
-    borderTopWidth: Borders.thin,
+    marginTop: Spacing.md,
   },
 });
