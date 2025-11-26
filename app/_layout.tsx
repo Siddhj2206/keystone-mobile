@@ -133,6 +133,22 @@ export default function RootLayout() {
             headerTitleStyle: HeaderStyles.title,
           }}
         />
+        <Stack.Screen
+          name="modals/edit-subject"
+          options={{
+            presentation: 'modal',
+            title: 'EDIT SUBJECT',
+            headerTitleStyle: HeaderStyles.title,
+          }}
+        />
+        <Stack.Screen
+          name="modals/edit-exam"
+          options={{
+            presentation: 'modal',
+            title: 'EDIT EXAM',
+            headerTitleStyle: HeaderStyles.title,
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

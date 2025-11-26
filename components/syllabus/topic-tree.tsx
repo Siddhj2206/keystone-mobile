@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     paddingRight: Spacing.md,
     gap: Spacing.sm,
-    minHeight: 44, // Minimum touch target
+    minHeight: Sizes.touchTarget,
   },
   rowLeft: {
     flex: 1,
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   expandIcon: {
-    width: 28,
+    width: Sizes.expandIconWidth,
     textAlign: 'center',
   },
   title: {

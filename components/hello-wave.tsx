@@ -7,6 +7,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { Sizes, LineHeights } from '@/constants/theme';
+
 export function HelloWave() {
   const rotation = useSharedValue(0);
 
@@ -28,8 +30,8 @@ export function HelloWave() {
     <Animated.Text
       style={[
         {
-          fontSize: 28,
-          lineHeight: 32,
+          fontSize: Sizes.waveEmoji,
+          lineHeight: LineHeights.xl,
           marginTop: -6,
         },
         animatedStyle,

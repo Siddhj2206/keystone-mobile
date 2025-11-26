@@ -48,6 +48,9 @@ export const SubjectColors = [
   '#AA00AA', '#00AAAA', '#AAAA00', '#FF00FF',
 ] as const;
 
+// Days of week for schedule UI
+export const DAYS_OF_WEEK = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'] as const;
+
 // Brutalist spacing system (multiples of 8, with xs exception)
 export const Spacing = {
   xs: 4,
@@ -116,14 +119,24 @@ export const Sizes = {
   colorDot: 12,
   colorSwatch: 40,
   progressBar: 8,
+  progressBarLg: 12,
   slider: 40,
   masteryBar: 60,
   percentWidth: 40,
+  touchTarget: 44,
+  colorBarWidth: 6,
+  colorBarHeight: 50,
+  colorIndicatorWidth: 4,
+  colorIndicatorHeightSm: 30,
+  colorIndicatorHeightMd: 40,
+  expandIconWidth: 28,
+  waveEmoji: 28,
 } as const;
 
 // Layout constants
 export const Layout = {
   modalMaxWidth: 360,
+  modalMaxWidthLg: 400,
   listMaxHeight: 300,
   headerHeight: 250,
 } as const;
@@ -209,6 +222,13 @@ export const CommonStyles = StyleSheet.create({
     borderTopWidth: Borders.thin,
   },
 
+  // Header row (spaceBetween pattern)
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
   // Stats row
   statsRow: {
     flexDirection: 'row',
@@ -220,11 +240,31 @@ export const CommonStyles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.xs,
   },
+  statDivider: {
+    width: Borders.thin,
+    alignSelf: 'stretch',
+  },
 
   // Color dot indicator
   colorDot: {
     width: Sizes.colorDot,
     height: Sizes.colorDot,
+  },
+
+  // Vertical color bar
+  colorBar: {
+    width: Sizes.colorBarWidth,
+    height: Sizes.colorBarHeight,
+  },
+
+  // Small color indicator
+  colorIndicator: {
+    width: Sizes.colorIndicatorWidth,
+    height: Sizes.colorIndicatorHeightMd,
+  },
+  colorIndicatorSm: {
+    width: Sizes.colorIndicatorWidth,
+    height: Sizes.colorIndicatorHeightSm,
   },
 
   // Divider
@@ -238,6 +278,10 @@ export const CommonStyles = StyleSheet.create({
     height: Sizes.progressBar,
     borderWidth: Borders.thin,
   },
+  progressBarContainerLg: {
+    height: Sizes.progressBarLg,
+    borderWidth: Borders.thin,
+  },
   progressBarFill: {
     height: '100%',
   },
@@ -249,6 +293,50 @@ export const CommonStyles = StyleSheet.create({
     gap: Spacing.sm,
     padding: Spacing.sm,
     borderWidth: Borders.regular,
+  },
+
+  // Loading/Empty containers
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+
+  // Modal overlay
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: Spacing.lg,
+  },
+
+  // Calendar modal
+  calendarModal: {
+    width: '100%',
+    maxWidth: Layout.modalMaxWidth,
+    borderWidth: Borders.thick,
+  },
+  calendarHeader: {
+    padding: Spacing.md,
+    borderBottomWidth: Borders.thin,
+  },
+  calendarActions: {
+    padding: Spacing.md,
+    borderTopWidth: Borders.thin,
+  },
+
+  // Touch target (min 44px)
+  touchTarget: {
+    minWidth: Sizes.touchTarget,
+    minHeight: Sizes.touchTarget,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

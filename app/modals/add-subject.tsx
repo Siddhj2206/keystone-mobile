@@ -6,30 +6,11 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Borders, Colors, Spacing, SubjectColors, Sizes, CommonStyles } from '@/constants/theme';
+import { Borders, Colors, Spacing, SubjectColors, Sizes, CommonStyles, DAYS_OF_WEEK, Layout } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSyllabusStore } from '@/stores/use-syllabus-store';
+import { isValidTime, normalizeTime } from '@/lib/time-utils';
 import type { ClassSlot } from '@/lib/types';
-
-const DAYS = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-
-// Validate time format HH:MM
-const isValidTime = (time: string): boolean => {
-  const match = time.match(/^(\d{1,2}):(\d{2})$/);
-  if (!match) return false;
-  const hours = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10);
-  return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
-};
-
-// Normalize time to HH:MM format
-const normalizeTime = (time: string): string => {
-  const match = time.match(/^(\d{1,2}):(\d{2})$/);
-  if (!match) return time;
-  const hours = parseInt(match[1], 10);
-  const minutes = parseInt(match[2], 10);
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-};
 
 export default function AddSubjectModal() {
   const colorScheme = useColorScheme() ?? 'light';
@@ -176,7 +157,7 @@ export default function AddSubjectModal() {
                   style={[styles.slotItem, { borderColor: colors.border }]}
                 >
                   <View style={styles.slotInfo}>
-                    <ThemedText type="label">{DAYS[slot.dayOfWeek]}</ThemedText>
+                    <ThemedText type="label">{DAYS_OF_WEEK[slot.dayOfWeek]}</ThemedText>
                     <ThemedText>{formatSlotTime(slot)}</ThemedText>
                   </View>
                   <Pressable onPress={() => handleRemoveSlot(slot.id)} hitSlop={8}>
@@ -227,7 +208,7 @@ export default function AddSubjectModal() {
             <View style={styles.section}>
               <ThemedText type="label">DAY</ThemedText>
               <View style={styles.dayGrid}>
-                {DAYS.map((day, index) => (
+                {DAYS_OF_WEEK.map((day, index) => (
                   <Pressable
                     key={day}
                     onPress={() => setNewSlotDay(index)}
@@ -348,20 +329,12 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderWidth: Borders.regular,
   },
-  previewIndicator: {
-    width: 4,
-    height: 30,
-  },
+  previewIndicator: CommonStyles.colorIndicatorSm,
   // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.lg,
-  },
+  modalOverlay: CommonStyles.modalOverlay,
   modalContent: {
     width: '100%',
-    maxWidth: 400,
+    maxWidth: Layout.modalMaxWidthLg,
     padding: Spacing.lg,
     gap: Spacing.md,
     borderWidth: Borders.thick,

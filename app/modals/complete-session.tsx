@@ -8,7 +8,7 @@ import { ThemedView } from '@/components/themed-view';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
-import { Borders, Colors, Spacing } from '@/constants/theme';
+import { Borders, Colors, Spacing, Sizes, CommonStyles } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useScheduleStore } from '@/stores/use-schedule-store';
 
@@ -168,20 +168,15 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     gap: Spacing.md,
   },
-  errorBox: {
-    borderWidth: Borders.regular,
-    padding: Spacing.sm,
-  },
-  section: {
-    gap: Spacing.sm,
-  },
+  errorBox: CommonStyles.errorBox,
+  section: CommonStyles.section,
   sliderContainer: {
     borderWidth: Borders.regular,
     padding: Spacing.sm,
   },
   slider: {
     width: '100%',
-    height: 40,
+    height: Sizes.slider,
   },
   toggleRow: {
     flexDirection: 'row',
@@ -190,9 +185,5 @@ const styles = StyleSheet.create({
   toggleButton: {
     flex: 1,
   },
-  actions: {
-    padding: Spacing.lg,
-    gap: Spacing.sm,
-    borderTopWidth: Borders.thin,
-  },
+  actions: CommonStyles.actionsFooter,
 });

@@ -3,7 +3,7 @@ import { StyleSheet, View, Pressable } from 'react-native';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { TimelineView } from '@/components/schedule/timeline-view';
-import { Borders, Colors, Spacing, FontSizes } from '@/constants/theme';
+import { Borders, Colors, Spacing, FontSizes, CommonStyles } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useScheduleStore } from '@/stores/use-schedule-store';
 
@@ -101,11 +101,8 @@ const styles = StyleSheet.create({
     borderBottomWidth: Borders.thin,
   },
   navButton: {
+    ...CommonStyles.touchTarget,
     padding: Spacing.sm,
-    minWidth: 44,
-    minHeight: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   dateDisplay: {
     flex: 1,

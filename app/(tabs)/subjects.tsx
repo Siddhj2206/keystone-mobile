@@ -6,7 +6,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Borders, Colors, Spacing } from '@/constants/theme';
+import { Colors, Spacing, CommonStyles } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useSyllabusStore } from '@/stores/use-syllabus-store';
 import type { Subject, Topic } from '@/lib/types';
@@ -145,11 +145,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  loading: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  loading: CommonStyles.loadingContainer,
   scrollView: {
     flex: 1,
   },
@@ -159,15 +155,10 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xl,
   },
   overview: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    ...CommonStyles.statsRow,
     paddingBottom: Spacing.lg,
-    borderBottomWidth: Borders.thin,
   },
-  overviewStat: {
-    alignItems: 'center',
-    gap: Spacing.xs,
-  },
+  overviewStat: CommonStyles.stat,
   subjectList: {
     gap: Spacing.md,
   },
@@ -182,22 +173,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
   },
-  colorIndicator: {
-    width: 4,
-    height: 40,
-  },
+  colorIndicator: CommonStyles.colorIndicator,
   subjectInfo: {
     flex: 1,
     gap: Spacing.xs,
   },
   progressContainer: {
-    height: 8,
-    borderWidth: Borders.thin,
+    ...CommonStyles.progressBarContainer,
     marginTop: Spacing.sm,
   },
-  progressFill: {
-    height: '100%',
-  },
+  progressFill: CommonStyles.progressBarFill,
   actions: {
     marginTop: Spacing.md,
   },

@@ -356,25 +356,10 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     borderWidth: Borders.regular,
   },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: Spacing.lg,
-  },
-  calendarContainer: {
-    width: '100%',
-    maxWidth: Layout.modalMaxWidth,
-    borderWidth: Borders.thick,
-  },
-  calendarHeader: {
-    padding: Spacing.md,
-    borderBottomWidth: Borders.thin,
-  },
-  calendarActions: {
-    padding: Spacing.md,
-    borderTopWidth: Borders.thin,
-  },
+  modalOverlay: CommonStyles.modalOverlay,
+  calendarContainer: CommonStyles.calendarModal,
+  calendarHeader: CommonStyles.calendarHeader,
+  calendarActions: CommonStyles.calendarActions,
   subjectList: {
     gap: Spacing.sm,
   },
