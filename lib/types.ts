@@ -24,6 +24,7 @@ export interface Subject {
   colorHex: string;
   topics: Topic[];
   progress: number; // 0.0 to 1.0
+  classSlots?: ClassSlot[];
 }
 
 export interface StudySession {
@@ -67,4 +68,12 @@ export interface CompleteSessionInput {
   actualMinutes: number;
   needsMoreTime: boolean;
   remainingMinutes?: number;
+}
+
+// Weekly class schedule slot for a subject
+export interface ClassSlot {
+  id: string;
+  dayOfWeek: number; // 0 = Sunday, 1 = Monday, etc.
+  startTime: string; // "HH:MM" format
+  endTime: string; // "HH:MM" format
 }

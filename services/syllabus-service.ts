@@ -1,5 +1,5 @@
 import { api } from './api';
-import type { Subject, Assessment, CreateAssessmentInput } from '@/lib/types';
+import type { Subject, Assessment, CreateAssessmentInput, ClassSlot } from '@/lib/types';
 
 export const syllabusService = {
   /**
@@ -50,8 +50,16 @@ export const syllabusService = {
   /**
    * Create a new subject
    */
-  async createSubject(data: { name: string; colorHex: string }): Promise<Subject> {
+  async createSubject(data: { name: string; colorHex: string; classSlots?: ClassSlot[] }): Promise<Subject> {
     const response = await api.post<Subject>(`/api/subjects`, data);
+    return response.data;
+  },
+
+  /**
+   * Update an existing subject
+   */
+  async updateSubject(id: string, data: Partial<Subject>): Promise<Subject> {
+    const response = await api.patch<Subject>(`/api/subjects/${id}`, data);
     return response.data;
   },
 

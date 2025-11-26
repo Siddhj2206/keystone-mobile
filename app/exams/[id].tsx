@@ -451,6 +451,9 @@ export default function ExamDetailScreen() {
           <Pressable onPress={() => router.back()} hitSlop={8}>
             <ThemedText type="label">{'< BACK'}</ThemedText>
           </Pressable>
+          <Pressable onPress={() => setIsEditing(true)} hitSlop={8}>
+            <ThemedText type="label">[EDIT]</ThemedText>
+          </Pressable>
         </View>
 
         {/* Exam Title */}
@@ -526,15 +529,6 @@ export default function ExamDetailScreen() {
           )}
         </View>
       </ScrollView>
-
-      {/* Actions */}
-      <View style={[styles.actions, { borderTopColor: colors.border }]}>
-        <Button
-          title="EDIT EXAM"
-          variant="primary"
-          onPress={() => setIsEditing(true)}
-        />
-      </View>
     </ThemedView>
   );
 }
@@ -559,6 +553,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
   },
   examHeader: {
     flexDirection: 'row',

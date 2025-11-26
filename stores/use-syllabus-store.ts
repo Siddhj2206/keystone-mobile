@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 import { syllabusService } from '@/services/syllabus-service';
 import { guestAuth } from '@/lib/auth-client';
-import type { Subject, Assessment, CreateAssessmentInput } from '@/lib/types';
+import type { Subject, Assessment, CreateAssessmentInput, ClassSlot } from '@/lib/types';
 
 // Mock data for guest mode
 const MOCK_SUBJECTS: Subject[] = [
@@ -116,7 +116,8 @@ interface SyllabusState {
   fetchSubjects: () => Promise<void>;
   fetchAssessments: () => Promise<void>;
   uploadSyllabus: (subjectId: string, fileUri: string, fileName: string) => Promise<void>;
-  createSubject: (name: string, colorHex: string) => Promise<Subject>;
+  createSubject: (name: string, colorHex: string, classSlots?: ClassSlot[]) => Promise<Subject>;
+  updateSubject: (id: string, data: Partial<Subject>) => Promise<void>;
   createAssessment: (data: CreateAssessmentInput) => Promise<Assessment>;
   updateAssessment: (id: string, data: Partial<Assessment>) => Promise<void>;
   getSubjectById: (id: string) => Subject | undefined;
@@ -199,7 +200,7 @@ export const useSyllabusStore = create<SyllabusState>((set, get) => ({
     }
   },
 
-  createSubject: async (name: string, colorHex: string) => {
+  createSubject: async (name: string, colorHex: string, classSlots?: ClassSlot[]) => {
     const isGuest = await guestAuth.isGuestMode();
     if (isGuest) {
       const newSubject: Subject = {
@@ -208,14 +209,39 @@ export const useSyllabusStore = create<SyllabusState>((set, get) => ({
         colorHex,
         progress: 0,
         topics: [],
+        classSlots,
       };
       set({ subjects: [...get().subjects, newSubject] });
       return newSubject;
     }
 
-    const newSubject = await syllabusService.createSubject({ name, colorHex });
+    const newSubject = await syllabusService.createSubject({ name, colorHex, classSlots });
     set({ subjects: [...get().subjects, newSubject] });
     return newSubject;
+  },
+
+  updateSubject: async (id: string, data: Partial<Subject>) => {
+    const isGuest = await guestAuth.isGuestMode();
+    if (isGuest) {
+      set({
+        subjects: get().subjects.map((s) =>
+          s.id === id ? { ...s, ...data } : s
+        ),
+      });
+      return;
+    }
+
+    try {
+      const updatedSubject = await syllabusService.updateSubject(id, data);
+      set({
+        subjects: get().subjects.map((s) =>
+          s.id === id ? updatedSubject : s
+        ),
+      });
+    } catch (error) {
+      set({ error: error instanceof Error ? error.message : 'Failed to update subject' });
+      throw error;
+    }
   },
 
   createAssessment: async (data: CreateAssessmentInput) => {
